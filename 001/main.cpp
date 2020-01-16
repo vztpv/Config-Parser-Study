@@ -138,25 +138,39 @@ void test(const char* text) {
 
 	for (auto x : vec) {
 		if (0 == state) {
-			node->var = x;
-			state = 1;
+			if (1 == x.len && '=' == x.ptr[0]) {
+				std::cout << "error1\n";
+				Clear(root);
+				return;
+			}
+			else {
+				node->var = x;
+				state = 1;
+			}
 		}
 		else if (1 == state) {
 			if (1 == x.len && '=' == x.ptr[0]) {
 				state = 2;
 			}
 			else {
-				std::cout << "error\n";
+				std::cout << "error2\n";
 				Clear(root);
 				return;
 			}
 		}
 		else if (2 == state) {
-			node->val = x;
-			state = 0;
+			if (1 == x.len && '=' == x.ptr[0]) {
+				std::cout << "error3\n";
+				Clear(root);
+				return;
+			}
+			else {
+				node->val = x;
+				state = 0;
 
-			node->next = new Node();
-			node = node->next;
+				node->next = new Node();
+				node = node->next;
+			}
 		}
 	}
 
