@@ -1,4 +1,5 @@
 
+//#include <vld.h> // chk memory leak.
 #include <iostream>
 #include <vector>
 
@@ -8,13 +9,23 @@ public:
 	int len;
 	long type; // todo, long -> enum or enum class
 public:
-	Token(const char* ptr, int len) :
+	Token(const char* ptr=nullptr, int len=0) :
 		ptr(ptr), len(len), type(0)
 	{
 		//
 	}
 };
-
+class Node
+{
+public:
+	Token var;
+	Token val;
+	Node* next = nullptr;
+public:
+	Node() {
+		//
+	}
+};
 
 std::vector<Token> GetTokens(const char* text, int len) {
 	std::vector<Token> token_vec;
@@ -77,6 +88,36 @@ std::vector<Token> GetTokens(const char* text, int len) {
 	
 	return token_vec;
 }
+void Clear(Node* node) {
+	Node* temp = node;
+
+	while (node) {
+		temp = temp->next;
+		delete node;
+		node = temp;
+	}
+}
+void Print(Token token) {
+	for (int i = 0; i < token.len; ++i) {
+		std::cout << token.ptr[i];
+	}
+}
+void Print(Node* node) {
+	Node* temp = node;
+
+	while (node) {
+		temp = temp->next;
+
+		if (node->next) {
+			Print(node->var);
+			std::cout << " = ";
+			Print(node->val);
+			std::cout << "\n";
+		}
+
+		node = temp;
+	}
+}
 
 void test(const char* text) {
 	std::vector<Token> vec;
@@ -89,7 +130,42 @@ void test(const char* text) {
 		}
 		std::cout << "\n";
 	}
+
+	// parsing..
+	Node* node = new Node();
+	Node* root = node;
+	long state = 0;
+
+	for (auto x : vec) {
+		if (0 == state) {
+			node->var = x;
+			state = 1;
+		}
+		else if (1 == state) {
+			if (1 == x.len && '=' == x.ptr[0]) {
+				state = 2;
+			}
+			else {
+				std::cout << "error\n";
+				Clear(root);
+				return;
+			}
+		}
+		else if (2 == state) {
+			node->val = x;
+			state = 0;
+
+			node->next = new Node();
+			node = node->next;
+		}
+	}
+
+	// print and delete
+	Print(root);
+
+	Clear(root);
 }
+
 
 int main(void)
 {
